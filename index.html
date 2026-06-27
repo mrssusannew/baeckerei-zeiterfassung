@@ -240,7 +240,7 @@ async function submit(){
   }catch(e){
     // Offline — trust local cache or skip PIN
     if(cache[who]&&cache[who]===pin){await loadStatus();}
-    else{document.getElementById("pin-err").textContent="Kein Internet — bitte später versuchen.";pin="";dots();}
+    else{await loadStatus();}
   }
 }
 
