@@ -77,7 +77,7 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
       <select id="sel"><option value="">– Name wird geladen... –</option></select>
     </div>
     <div class="spacer"></div>
-    <button class="btn-yellow" ontouchstart="goPin()">Weiter →</button>
+    <button class="btn-yellow" onclick="goPin()">Weiter →</button>
   </div>
 
   <div class="screen" id="s-pin" style="display:none">
@@ -90,7 +90,7 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
       <div class="pin-err" id="pin-err"></div>
     </div>
     <div class="numpad" id="numpad"></div>
-    <button class="btn-ghost" ontouchstart="goBack()">← Zurück</button>
+    <button class="btn-ghost" onclick="goBack()">← Zurück</button>
   </div>
 
   <div class="screen" id="s-action" style="display:none">
@@ -100,12 +100,12 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
       <div class="status-time" id="s-time"></div>
     </div>
     <div class="action-grid">
-      <button class="action-btn btn-start" id="b-start" ontouchstart="doAction('Start')"><span class="icon">▶</span>Start</button>
-      <button class="action-btn btn-break" id="b-break" ontouchstart="doAction('Break')"><span class="icon">⏸</span>Pause</button>
-      <button class="action-btn btn-resume" id="b-resume" ontouchstart="doAction('Resume')"><span class="icon">↩</span>Weiter</button>
-      <button class="action-btn btn-end" id="b-end" ontouchstart="doAction('End')"><span class="icon">⏹</span>Ende</button>
+      <button class="action-btn btn-start" id="b-start" onclick="doAction('Start')"><span class="icon">▶</span>Start</button>
+      <button class="action-btn btn-break" id="b-break" onclick="doAction('Break')"><span class="icon">⏸</span>Pause</button>
+      <button class="action-btn btn-resume" id="b-resume" onclick="doAction('Resume')"><span class="icon">↩</span>Weiter</button>
+      <button class="action-btn btn-end" id="b-end" onclick="doAction('End')"><span class="icon">⏹</span>Ende</button>
     </div>
-    <button class="btn-ghost" ontouchstart="goBack()">← Zurück</button>
+    <button class="btn-ghost" onclick="goBack()">← Zurück</button>
   </div>
 
   <div class="screen" id="s-success" style="display:none">
@@ -121,67 +121,76 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 <script>
 const API="https://script.google.com/macros/s/AKfycbzJyyMoQ3BnCR8IsrQ2x7-u11Y-6UUSqH-q4aShQUBEXCc-jbqHxmVNX7H25WBjfPJu/exec";
 const FALLBACK=["Volker M.","Manuel","Isabelle","Tim","Stefan","Thomas","Renate","Jürgen","Ann-Marie","Ela","Marianne","Daniel"];
-let who="",pin="",sd=null,isOnline=navigator.onLine;
+let who="", pin="", sd=null, isOnline=navigator.onLine;
 
-// Offline queue
-function getQueue(){try{return JSON.parse(localStorage.getItem("queue")||"[]");}catch(e){return[];}}
-function saveQueue(q){localStorage.setItem("queue",JSON.stringify(q));}
-function addToQueue(name,aktion){const q=getQueue();q.push({name,aktion,timestamp:new Date().toISOString()});saveQueue(q);}
+function getQueue(){try{return JSON.parse(localStorage.getItem("q")||"[]");}catch(e){return[];}}
+function saveQueue(q){try{localStorage.setItem("q",JSON.stringify(q));}catch(e){}}
+function addToQueue(name,aktion){const q=getQueue();q.push({name,aktion,ts:new Date().toISOString()});saveQueue(q);}
+function getPinCache(){try{return JSON.parse(localStorage.getItem("pc")||"{}");}catch(e){return{};}}
 
-// Sync queue when back online
 async function syncQueue(){
   const q=getQueue();
-  if(q.length===0)return;
-  showSyncBar();
+  if(!q.length)return;
+  document.getElementById("sync-bar").classList.add("visible");
   const failed=[];
   for(const item of q){
-    try{
-      await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:item.name,aktion:item.aktion,timestamp:item.timestamp})});
-    }catch(e){failed.push(item);}
+    try{await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:item.name,aktion:item.aktion})});}
+    catch(e){failed.push(item);}
   }
   saveQueue(failed);
-  setTimeout(hideSyncBar,3000);
+  setTimeout(function(){document.getElementById("sync-bar").classList.remove("visible");},3000);
 }
 
-function showOfflineBar(){document.getElementById("offline-bar").classList.add("visible");document.getElementById("sync-bar").classList.remove("visible");}
-function showSyncBar(){document.getElementById("sync-bar").classList.add("visible");document.getElementById("offline-bar").classList.remove("visible");}
-function hideSyncBar(){document.getElementById("sync-bar").classList.remove("visible");}
 function updateOnlineStatus(){
   isOnline=navigator.onLine;
-  if(isOnline){document.getElementById("offline-bar").classList.remove("visible");syncQueue();}
-  else{showOfflineBar();}
+  if(isOnline){
+    document.getElementById("offline-bar").classList.remove("visible");
+    syncQueue();
+  } else {
+    document.getElementById("offline-bar").classList.add("visible");
+    document.getElementById("sync-bar").classList.remove("visible");
+  }
 }
 window.addEventListener("online",updateOnlineStatus);
 window.addEventListener("offline",updateOnlineStatus);
-if(!navigator.onLine)showOfflineBar();
+if(!navigator.onLine)document.getElementById("offline-bar").classList.add("visible");
 
-// Clock
-function tick(){const n=new Date();document.getElementById("clk").innerHTML=n.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"short"})+"<br>"+n.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});}
+function tick(){
+  const n=new Date();
+  document.getElementById("clk").innerHTML=n.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"short"})+"<br>"+n.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+}
 setInterval(tick,1000);tick();
 
-// Load names
-function fillNames(names){const sl=document.getElementById("sel");sl.innerHTML="";const def=document.createElement("option");def.value="";def.textContent="– Name auswählen –";sl.appendChild(def);names.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});}
-async function loadNames(){
-  // Try local cache first for speed
-  const cached=localStorage.getItem("employees");
-  if(cached){fillNames(JSON.parse(cached));}
-  // Then fetch fresh from sheet
-  try{
-    window._cb=function(data){
-      if(data.employees&&data.employees.length>0){
-        fillNames(data.employees);
-        localStorage.setItem("employees",JSON.stringify(data.employees));
-      } else if(!cached){fillNames(FALLBACK);}
-    };
-    const s=document.createElement("script");s.src=API+"?action=getEmployees&callback=_cb";document.head.appendChild(s);
-  }catch(e){if(!cached)fillNames(FALLBACK);}
+function fillNames(names){
+  const sl=document.getElementById("sel");
+  sl.innerHTML="";
+  const def=document.createElement("option");
+  def.value="";def.textContent="– Name auswählen –";
+  sl.appendChild(def);
+  names.forEach(function(n){const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});
+}
+
+function loadNames(){
+  const cached=localStorage.getItem("emp");
+  if(cached){try{fillNames(JSON.parse(cached));}catch(e){}}
+  window._cb=function(data){
+    if(data.employees&&data.employees.length>0){
+      fillNames(data.employees);
+      localStorage.setItem("emp",JSON.stringify(data.employees));
+    } else if(!cached){fillNames(FALLBACK);}
+  };
+  const s=document.createElement("script");
+  s.onerror=function(){if(!cached)fillNames(FALLBACK);};
+  s.src=API+"?action=getEmployees&callback=_cb";
+  document.head.appendChild(s);
 }
 loadNames();
 
-// PIN check - use local cache for speed
-function getPinCache(){try{return JSON.parse(localStorage.getItem("pinCache")||"{}");}catch(e){return{};}}
-
-function show(id){["s-main","s-pin","s-action","s-success"].forEach(s=>{document.getElementById(s).style.display=s===id?"flex":"none";});}
+function show(id){
+  ["s-main","s-pin","s-action","s-success"].forEach(function(s){
+    document.getElementById(s).style.display=s===id?"flex":"none";
+  });
+}
 
 function goPin(){
   who=document.getElementById("sel").value;
@@ -193,19 +202,22 @@ function goPin(){
 }
 
 function buildPad(){
-  const np=document.getElementById("numpad");np.innerHTML="";
-  [1,2,3,4,5,6,7,8,9].forEach(k=>{nb(np,k,()=>key(k));});
-  nb(np,"⌫",()=>key("del"),"del");
-  nb(np,0,()=>key(0));
-  nb(np,"OK",()=>key("ok"),"ok");
+  const np=document.getElementById("numpad");
+  np.innerHTML="";
+  [1,2,3,4,5,6,7,8,9].forEach(function(k){nb(np,k,function(){key(k);});});
+  nb(np,"⌫",function(){key("del");},"del");
+  nb(np,0,function(){key(0);});
+  nb(np,"OK",function(){key("ok");},"ok");
 }
-function nb(p,l,cb,c=""){
+
+function nb(p,l,cb,c){
   const b=document.createElement("button");
-  b.className="nkey "+c;b.textContent=l;
-  b.addEventListener("touchstart",(e)=>{e.preventDefault();cb();},{passive:false});
-  b.addEventListener("click",cb);
+  b.className="nkey "+(c||"");
+  b.textContent=l;
+  b.onclick=function(e){e.preventDefault();cb();};
   p.appendChild(b);
 }
+
 function key(k){
   if(k==="del"){pin=pin.slice(0,-1);}
   else if(k==="ok"){submit();return;}
@@ -213,71 +225,37 @@ function key(k){
   dots();
   if(pin.length===4)setTimeout(submit,50);
 }
-function dots(){for(let i=0;i<4;i++)document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");}
 
-// Optimistic PIN check — check locally first, verify in background
-async function submit(){
-  if(pin.length!==4)return;
-  // Check against cached PINs first for instant response
-  const cache=getPinCache();
-  if(cache[who]&&cache[who]===pin){
-    await loadStatus();return;
+function dots(){
+  for(var i=0;i<4;i++){
+    document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");
   }
-  // Online check
-  try{
-    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin})});
-    const d=await r.json();
+}
+
+function submit(){
+  if(pin.length!==4)return;
+  const cache=getPinCache();
+  if(cache[who]&&cache[who]===pin){loadStatus();return;}
+  fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin:pin})})
+  .then(function(r){return r.json();})
+  .then(function(d){
     if(d.valid){
-      // Cache PIN locally for next time
-      const c=getPinCache();c[who]=pin;localStorage.setItem("pinCache",JSON.stringify(c));
-      await loadStatus();
-    }else{
-      // Clear cached PIN if wrong
-      const c=getPinCache();delete c[who];localStorage.setItem("pinCache",JSON.stringify(c));
+      const c=getPinCache();c[who]=pin;localStorage.setItem("pc",JSON.stringify(c));
+      loadStatus();
+    } else {
+      const c=getPinCache();delete c[who];localStorage.setItem("pc",JSON.stringify(c));
       document.getElementById("pin-err").textContent="Falscher PIN. Nochmal versuchen.";
       pin="";dots();
     }
-  }catch(e){
-    // Offline — trust local cache or skip PIN
-    if(cache[who]&&cache[who]===pin){await loadStatus();}
-    else{await loadStatus();}
-  }
+  })
+  .catch(function(){loadStatus();});
 }
 
-// Status — use local log for speed
-function getLocalStatus(name){
-  const q=getQueue();
-  const today=new Date().toDateString();
-  const todayEntries=q.filter(e=>e.name===name&&new Date(e.timestamp).toDateString()===today);
-  if(todayEntries.length===0)return null;
-  return todayEntries[todayEntries.length-1];
-}
-
-async function loadStatus(){
-  // Show optimistic status from local queue immediately
-  const local=getLocalStatus(who);
-  if(local){
-    const now=new Date();
-    const then=new Date(local.timestamp);
-    const min=Math.floor((now-then)/60000);
-    if(local.aktion==="Start"||local.aktion==="Resume"){
-      sd={status:"arbeitet",message:`Arbeitet seit ${min} Minuten`,buttons:["Break","End"]};
-    } else if(local.aktion==="Break"){
-      sd={status:"pause",message:`In Pause seit ${min} Minuten`,buttons:["Resume"]};
-    } else if(local.aktion==="End"){
-      sd={status:"beendet",message:`Schicht beendet um ${then.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}`,buttons:["Start"]};
-    }
-    showActions();
-  }
-  // Then fetch real status from sheet in background
-  try{
-    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})});
-    sd=await r.json();
-    showActions();
-  }catch(e){
-    if(!local)sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};
-    if(!local)showActions();
-  }
+function loadStatus(){
+  fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})})
+  .then(function(r){return r.json();})
+  .then(function(data){sd=data;showActions();})
+  .catch(function(){sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};showActions();});
 }
 
 function showActions(){
@@ -293,37 +271,44 @@ function showActions(){
   show("s-action");
 }
 
-// Optimistic action — show success immediately, sync in background
-async function doAction(aktion){
-  if(document.getElementById("b-"+aktion.toLowerCase()).disabled)return;
+function doAction(aktion){
   const labels={Start:"Schicht gestartet!",Break:"Pause läuft.",Resume:"Weiter geht's!",End:"Tschüss, bis morgen!"};
   const icons={Start:"▶️",Break:"☕",Resume:"💪",End:"🌾"};
 
-  // Show success immediately
   document.getElementById("s-icon").textContent=icons[aktion];
   document.getElementById("s-title").textContent=labels[aktion];
   document.getElementById("s-sub").textContent=who+" · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr";
-  const f=document.getElementById("s-fill");f.style.animation="none";f.offsetHeight;f.style.animation="fill 3s linear forwards";
+  var f=document.getElementById("s-fill");
+  f.style.animation="none";
+  f.offsetHeight;
+  f.style.animation="fill 3s linear forwards";
   show("s-success");
 
-  // Add to local queue
   addToQueue(who,aktion);
-
-  // Sync in background
   if(isOnline){
-    try{
-      await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:who,aktion})});
-      // Remove from queue if successful
-      const q=getQueue();
-      const idx=q.findLastIndex(e=>e.name===who&&e.aktion===aktion);
+    fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:who,aktion:aktion})})
+    .then(function(){
+      var q=getQueue();
+      var idx=-1;
+      for(var i=q.length-1;i>=0;i--){if(q[i].name===who&&q[i].aktion===aktion){idx=i;break;}}
       if(idx>-1){q.splice(idx,1);saveQueue(q);}
-    }catch(e){}
+    })
+    .catch(function(){});
   }
-  setTimeout(()=>{reset();show("s-main");},3000);
+
+  setTimeout(function(){
+    who="";
+    pin="";
+    var sl=document.getElementById("sel");
+    if(sl)sl.value="";
+    show("s-main");
+  },3000);
 }
 
-function reset(){who="";pin="";document.getElementById("sel").value="";show("s-main");}
-function goBack(){if(document.getElementById("s-action").style.display!=="none")show("s-pin");else reset();}
+function goBack(){
+  if(document.getElementById("s-action").style.display!=="none"){show("s-pin");}
+  else{who="";pin="";show("s-main");}
+}
 </script>
 </body>
 </html>
