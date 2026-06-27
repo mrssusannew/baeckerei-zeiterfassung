@@ -8,13 +8,17 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;background:#f5f5f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;}
 .app{width:100%;height:100%;display:flex;flex-direction:column;background:#fff;}
+.offline-bar{background:#e74c3c;color:#fff;text-align:center;font-size:12px;font-weight:600;padding:5px;display:none;flex-shrink:0;}
+.offline-bar.visible{display:block;}
+.sync-bar{background:#2ecc71;color:#fff;text-align:center;font-size:12px;font-weight:600;padding:5px;display:none;flex-shrink:0;}
+.sync-bar.visible{display:block;}
 .header{border-bottom:3px solid #F5C800;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;height:60px;flex-shrink:0;}
 .logo-area{display:flex;align-items:center;gap:8px;}
 .logo-circle{width:34px;height:34px;border-radius:50%;border:2px solid #F5C800;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .logo-text{font-size:13px;font-weight:700;color:#1a1a1a;}
 .logo-sub{font-size:10px;color:#888;}
 .clock{font-size:11px;color:#888;text-align:right;line-height:1.5;}
-.screen{flex:1;display:flex;flex-direction:column;padding:12px;gap:8px;height:calc(100vh - 60px);overflow:hidden;}
+.screen{flex:1;display:flex;flex-direction:column;padding:12px;gap:8px;overflow:hidden;}
 .field-label{font-size:13px;color:#888;margin-bottom:5px;font-weight:500;}
 select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;background:#fff;color:#1a1a1a;font-size:16px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
 .spacer{flex:1;}
@@ -25,7 +29,7 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 .pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:4px;}
 .dot{width:13px;height:13px;border-radius:50%;background:#e0e0e0;}
 .dot.filled{background:#F5C800;}
-.pin-err{color:#c0392b;font-size:12px;margin-top:4px;min-height:16px;}
+.pin-err{color:#e74c3c;font-size:12px;margin-top:4px;min-height:16px;}
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,11vh);gap:6px;flex-shrink:0;}
 .nkey{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:10px;font-size:22px;font-weight:500;cursor:pointer;color:#1a1a1a;display:flex;align-items:center;justify-content:center;touch-action:manipulation;width:100%;height:100%;}
 .nkey:active{background:#F5C800;border-color:#F5C800;}
@@ -54,6 +58,8 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 </head>
 <body>
 <div class="app">
+  <div class="offline-bar" id="offline-bar">⚠️ Kein Internet — Einträge werden gespeichert und später synchronisiert</div>
+  <div class="sync-bar" id="sync-bar">✅ Verbindung wiederhergestellt — Einträge werden synchronisiert</div>
   <div class="header">
     <div class="logo-area">
       <div class="logo-circle">🌾</div>
@@ -71,7 +77,7 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
       <select id="sel"><option value="">– Name wird geladen... –</option></select>
     </div>
     <div class="spacer"></div>
-    <button class="btn-yellow" onclick="goPin()">Weiter →</button>
+    <button class="btn-yellow" ontouchstart="goPin()">Weiter →</button>
   </div>
 
   <div class="screen" id="s-pin" style="display:none">
@@ -84,7 +90,7 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
       <div class="pin-err" id="pin-err"></div>
     </div>
     <div class="numpad" id="numpad"></div>
-    <button class="btn-ghost" onclick="goBack()">← Zurück</button>
+    <button class="btn-ghost" ontouchstart="goBack()">← Zurück</button>
   </div>
 
   <div class="screen" id="s-action" style="display:none">
@@ -94,12 +100,12 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
       <div class="status-time" id="s-time"></div>
     </div>
     <div class="action-grid">
-      <button class="action-btn btn-start" id="b-start" onclick="doAction('Start')"><span class="icon">▶</span>Start</button>
-      <button class="action-btn btn-break" id="b-break" onclick="doAction('Break')"><span class="icon">⏸</span>Pause</button>
-      <button class="action-btn btn-resume" id="b-resume" onclick="doAction('Resume')"><span class="icon">↩</span>Weiter</button>
-      <button class="action-btn btn-end" id="b-end" onclick="doAction('End')"><span class="icon">⏹</span>Ende</button>
+      <button class="action-btn btn-start" id="b-start" ontouchstart="doAction('Start')"><span class="icon">▶</span>Start</button>
+      <button class="action-btn btn-break" id="b-break" ontouchstart="doAction('Break')"><span class="icon">⏸</span>Pause</button>
+      <button class="action-btn btn-resume" id="b-resume" ontouchstart="doAction('Resume')"><span class="icon">↩</span>Weiter</button>
+      <button class="action-btn btn-end" id="b-end" ontouchstart="doAction('End')"><span class="icon">⏹</span>Ende</button>
     </div>
-    <button class="btn-ghost" onclick="goBack()">← Zurück</button>
+    <button class="btn-ghost" ontouchstart="goBack()">← Zurück</button>
   </div>
 
   <div class="screen" id="s-success" style="display:none">
@@ -115,22 +121,207 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 <script>
 const API="https://script.google.com/macros/s/AKfycbzJyyMoQ3BnCR8IsrQ2x7-u11Y-6UUSqH-q4aShQUBEXCc-jbqHxmVNX7H25WBjfPJu/exec";
 const FALLBACK=["Volker M.","Manuel","Isabelle","Tim","Stefan","Thomas","Renate","Jürgen","Ann-Marie","Ela","Marianne","Daniel"];
-let who="",pin="",sd=null;
+let who="",pin="",sd=null,isOnline=navigator.onLine;
+
+// Offline queue
+function getQueue(){try{return JSON.parse(localStorage.getItem("queue")||"[]");}catch(e){return[];}}
+function saveQueue(q){localStorage.setItem("queue",JSON.stringify(q));}
+function addToQueue(name,aktion){const q=getQueue();q.push({name,aktion,timestamp:new Date().toISOString()});saveQueue(q);}
+
+// Sync queue when back online
+async function syncQueue(){
+  const q=getQueue();
+  if(q.length===0)return;
+  showSyncBar();
+  const failed=[];
+  for(const item of q){
+    try{
+      await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:item.name,aktion:item.aktion,timestamp:item.timestamp})});
+    }catch(e){failed.push(item);}
+  }
+  saveQueue(failed);
+  setTimeout(hideSyncBar,3000);
+}
+
+function showOfflineBar(){document.getElementById("offline-bar").classList.add("visible");document.getElementById("sync-bar").classList.remove("visible");}
+function showSyncBar(){document.getElementById("sync-bar").classList.add("visible");document.getElementById("offline-bar").classList.remove("visible");}
+function hideSyncBar(){document.getElementById("sync-bar").classList.remove("visible");}
+function updateOnlineStatus(){
+  isOnline=navigator.onLine;
+  if(isOnline){document.getElementById("offline-bar").classList.remove("visible");syncQueue();}
+  else{showOfflineBar();}
+}
+window.addEventListener("online",updateOnlineStatus);
+window.addEventListener("offline",updateOnlineStatus);
+if(!navigator.onLine)showOfflineBar();
+
+// Clock
 function tick(){const n=new Date();document.getElementById("clk").innerHTML=n.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"short"})+"<br>"+n.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});}
 setInterval(tick,1000);tick();
+
+// Load names
 function fillNames(names){const sl=document.getElementById("sel");sl.innerHTML="";const def=document.createElement("option");def.value="";def.textContent="– Name auswählen –";sl.appendChild(def);names.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});}
-async function loadNames(){try{window._cb=function(data){if(data.employees&&data.employees.length>0){fillNames(data.employees);}else{fillNames(FALLBACK);}};const s=document.createElement("script");s.src=API+"?action=getEmployees&callback=_cb";document.head.appendChild(s);}catch(e){fillNames(FALLBACK);}}
+async function loadNames(){
+  // Try local cache first for speed
+  const cached=localStorage.getItem("employees");
+  if(cached){fillNames(JSON.parse(cached));}
+  // Then fetch fresh from sheet
+  try{
+    window._cb=function(data){
+      if(data.employees&&data.employees.length>0){
+        fillNames(data.employees);
+        localStorage.setItem("employees",JSON.stringify(data.employees));
+      } else if(!cached){fillNames(FALLBACK);}
+    };
+    const s=document.createElement("script");s.src=API+"?action=getEmployees&callback=_cb";document.head.appendChild(s);
+  }catch(e){if(!cached)fillNames(FALLBACK);}
+}
 loadNames();
+
+// PIN check - use local cache for speed
+function getPinCache(){try{return JSON.parse(localStorage.getItem("pinCache")||"{}");}catch(e){return{};}}
+
 function show(id){["s-main","s-pin","s-action","s-success"].forEach(s=>{document.getElementById(s).style.display=s===id?"flex":"none";});}
-function goPin(){who=document.getElementById("sel").value;if(!who)return;pin="";document.getElementById("pin-name").textContent=who;document.getElementById("pin-err").textContent="";dots();buildPad();show("s-pin");}
-function buildPad(){const np=document.getElementById("numpad");np.innerHTML="";[1,2,3,4,5,6,7,8,9].forEach(k=>{nb(np,k,()=>key(k));});nb(np,"⌫",()=>key("del"),"del");nb(np,0,()=>key(0));nb(np,"OK",()=>key("ok"),"ok");}
-function nb(p,l,cb,c=""){const b=document.createElement("button");b.className="nkey "+c;b.textContent=l;b.onclick=cb;p.appendChild(b);}
-function key(k){if(k==="del"){pin=pin.slice(0,-1);}else if(k==="ok"){submit();return;}else if(pin.length<4){pin+=String(k);}dots();if(pin.length===4)setTimeout(submit,150);}
+
+function goPin(){
+  who=document.getElementById("sel").value;
+  if(!who)return;
+  pin="";
+  document.getElementById("pin-name").textContent=who;
+  document.getElementById("pin-err").textContent="";
+  dots();buildPad();show("s-pin");
+}
+
+function buildPad(){
+  const np=document.getElementById("numpad");np.innerHTML="";
+  [1,2,3,4,5,6,7,8,9].forEach(k=>{nb(np,k,()=>key(k));});
+  nb(np,"⌫",()=>key("del"),"del");
+  nb(np,0,()=>key(0));
+  nb(np,"OK",()=>key("ok"),"ok");
+}
+function nb(p,l,cb,c=""){
+  const b=document.createElement("button");
+  b.className="nkey "+c;b.textContent=l;
+  b.addEventListener("touchstart",(e)=>{e.preventDefault();cb();},{passive:false});
+  b.addEventListener("click",cb);
+  p.appendChild(b);
+}
+function key(k){
+  if(k==="del"){pin=pin.slice(0,-1);}
+  else if(k==="ok"){submit();return;}
+  else if(pin.length<4){pin+=String(k);}
+  dots();
+  if(pin.length===4)setTimeout(submit,50);
+}
 function dots(){for(let i=0;i<4;i++)document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");}
-async function submit(){if(pin.length!==4)return;try{const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin})});const d=await r.json();if(d.valid){await loadStatus();}else{document.getElementById("pin-err").textContent="Falscher PIN. Nochmal versuchen.";pin="";dots();}}catch(e){await loadStatus();}}
-async function loadStatus(){try{const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})});sd=await r.json();}catch(e){sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};}showActions();}
-function showActions(){const emap={neu:"👋",arbeitet:"💪",pause:"☕",beendet:"✅"};document.getElementById("s-emoji").textContent=emap[sd.status]||"👋";document.getElementById("s-msg").textContent=sd.message;document.getElementById("s-time").textContent="";const active=sd.buttons||["Start"];document.getElementById("b-start").disabled=!active.includes("Start");document.getElementById("b-break").disabled=!active.includes("Break");document.getElementById("b-resume").disabled=!active.includes("Resume");document.getElementById("b-end").disabled=!active.includes("End");show("s-action");}
-async function doAction(aktion){const labels={Start:"Schicht gestartet!",Break:"Pause läuft.",Resume:"Weiter geht's!",End:"Tschüss, bis morgen!"};const icons={Start:"▶️",Break:"☕",Resume:"💪",End:"🌾"};try{await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:who,aktion})});}catch(e){}document.getElementById("s-icon").textContent=icons[aktion];document.getElementById("s-title").textContent=labels[aktion];document.getElementById("s-sub").textContent=who+" · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr";const f=document.getElementById("s-fill");f.style.animation="none";f.offsetHeight;f.style.animation="fill 3s linear forwards";show("s-success");setTimeout(reset,3000);}
+
+// Optimistic PIN check — check locally first, verify in background
+async function submit(){
+  if(pin.length!==4)return;
+  // Check against cached PINs first for instant response
+  const cache=getPinCache();
+  if(cache[who]&&cache[who]===pin){
+    await loadStatus();return;
+  }
+  // Online check
+  try{
+    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin})});
+    const d=await r.json();
+    if(d.valid){
+      // Cache PIN locally for next time
+      const c=getPinCache();c[who]=pin;localStorage.setItem("pinCache",JSON.stringify(c));
+      await loadStatus();
+    }else{
+      // Clear cached PIN if wrong
+      const c=getPinCache();delete c[who];localStorage.setItem("pinCache",JSON.stringify(c));
+      document.getElementById("pin-err").textContent="Falscher PIN. Nochmal versuchen.";
+      pin="";dots();
+    }
+  }catch(e){
+    // Offline — trust local cache or skip PIN
+    if(cache[who]&&cache[who]===pin){await loadStatus();}
+    else{document.getElementById("pin-err").textContent="Kein Internet — bitte später versuchen.";pin="";dots();}
+  }
+}
+
+// Status — use local log for speed
+function getLocalStatus(name){
+  const q=getQueue();
+  const today=new Date().toDateString();
+  const todayEntries=q.filter(e=>e.name===name&&new Date(e.timestamp).toDateString()===today);
+  if(todayEntries.length===0)return null;
+  return todayEntries[todayEntries.length-1];
+}
+
+async function loadStatus(){
+  // Show optimistic status from local queue immediately
+  const local=getLocalStatus(who);
+  if(local){
+    const now=new Date();
+    const then=new Date(local.timestamp);
+    const min=Math.floor((now-then)/60000);
+    if(local.aktion==="Start"||local.aktion==="Resume"){
+      sd={status:"arbeitet",message:`Arbeitet seit ${min} Minuten`,buttons:["Break","End"]};
+    } else if(local.aktion==="Break"){
+      sd={status:"pause",message:`In Pause seit ${min} Minuten`,buttons:["Resume"]};
+    } else if(local.aktion==="End"){
+      sd={status:"beendet",message:`Schicht beendet um ${then.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}`,buttons:["Start"]};
+    }
+    showActions();
+  }
+  // Then fetch real status from sheet in background
+  try{
+    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})});
+    sd=await r.json();
+    showActions();
+  }catch(e){
+    if(!local)sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};
+    if(!local)showActions();
+  }
+}
+
+function showActions(){
+  const emap={neu:"👋",arbeitet:"💪",pause:"☕",beendet:"✅"};
+  document.getElementById("s-emoji").textContent=emap[sd.status]||"👋";
+  document.getElementById("s-msg").textContent=sd.message;
+  document.getElementById("s-time").textContent="";
+  const active=sd.buttons||["Start"];
+  document.getElementById("b-start").disabled=!active.includes("Start");
+  document.getElementById("b-break").disabled=!active.includes("Break");
+  document.getElementById("b-resume").disabled=!active.includes("Resume");
+  document.getElementById("b-end").disabled=!active.includes("End");
+  show("s-action");
+}
+
+// Optimistic action — show success immediately, sync in background
+async function doAction(aktion){
+  if(document.getElementById("b-"+aktion.toLowerCase()).disabled)return;
+  const labels={Start:"Schicht gestartet!",Break:"Pause läuft.",Resume:"Weiter geht's!",End:"Tschüss, bis morgen!"};
+  const icons={Start:"▶️",Break:"☕",Resume:"💪",End:"🌾"};
+
+  // Show success immediately
+  document.getElementById("s-icon").textContent=icons[aktion];
+  document.getElementById("s-title").textContent=labels[aktion];
+  document.getElementById("s-sub").textContent=who+" · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr";
+  const f=document.getElementById("s-fill");f.style.animation="none";f.offsetHeight;f.style.animation="fill 3s linear forwards";
+  show("s-success");
+
+  // Add to local queue
+  addToQueue(who,aktion);
+
+  // Sync in background
+  if(isOnline){
+    try{
+      await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:who,aktion})});
+      // Remove from queue if successful
+      const q=getQueue();
+      const idx=q.findLastIndex(e=>e.name===who&&e.aktion===aktion);
+      if(idx>-1){q.splice(idx,1);saveQueue(q);}
+    }catch(e){}
+  }
+  setTimeout(reset,3000);
+}
+
 function reset(){who="";pin="";document.getElementById("sel").value="";show("s-main");}
 function goBack(){if(document.getElementById("s-action").style.display!=="none")show("s-pin");else reset();}
 </script>
