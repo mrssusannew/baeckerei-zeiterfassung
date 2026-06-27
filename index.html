@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bäckerei Wehr – Zeiterfassung</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.app{width:100%;max-width:480px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.08);}
+.header{background:#fff;border-bottom:3px solid #F5C800;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.logo-area{display:flex;align-items:center;gap:12px;}
+.logo-circle{width:48px;height:48px;border-radius:50%;border:3px solid #F5C800;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.logo-text{font-size:16px;font-weight:600;color:#1a1a1a;}
+.logo-sub{font-size:12px;color:#888;margin-top:1px;}
+.clock{font-size:13px;color:#888;text-align:right;line-height:1.5;}
+.screen{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;min-height:420px;}
+.field-label{font-size:13px;color:#888;margin-bottom:6px;font-weight:500;}
+select{width:100%;padding:16px;border:1.5px solid #e0e0e0;border-radius:12px;background:#fff;color:#1a1a1a;font-size:18px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+select:focus{outline:none;border-color:#F5C800;}
+.spacer{flex:1;}
+.btn-yellow{background:#F5C800;color:#1a1a1a;border:none;border-radius:12px;font-size:20px;font-weight:600;padding:20px;width:100%;cursor:pointer;}
+.btn-yellow:active{background:#e6b800;}
+.btn-ghost{background:#fff;color:#888;border:1.5px solid #e0e0e0;border-radius:12px;font-size:16px;padding:15px;width:100%;cursor:pointer;margin-top:4px;}
+.pin-area{text-align:center;padding:0.5rem 0;}
+.pin-who{font-size:18px;font-weight:600;color:#1a1a1a;margin-bottom:16px;}
+.pin-dots{display:flex;gap:16px;justify-content:center;margin-bottom:8px;}
+.dot{width:18px;height:18px;border-radius:50%;background:#e0e0e0;}
+.dot.filled{background:#F5C800;}
+.pin-err{color:#c0392b;font-size:14px;margin-top:8px;min-height:20px;}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.nkey{padding:20px;background:#fafafa;border:1.5px solid #f0f0f0;border-radius:12px;font-size:22px;font-weight:500;cursor:pointer;color:#1a1a1a;}
+.nkey:active{background:#F5C800;border-color:#F5C800;}
+.nkey.del{font-size:16px;color:#888;}
+.nkey.ok{background:#F5C800;border-color:#F5C800;font-size:16px;font-weight:600;}
+.status-box{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:1.5rem;text-align:center;}
+.status-emoji{font-size:36px;margin-bottom:8px;}
+.status-msg{font-size:17px;font-weight:600;color:#1a1a1a;}
+.status-time{font-size:14px;color:#888;margin-top:4px;}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.action-btn{padding:26px 10px;border:none;border-radius:14px;font-size:18px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.action-btn .icon{font-size:28px;}
+.action-btn:disabled{opacity:0.2;cursor:not-allowed;}
+.btn-start{background:#F5C800;color:#1a1a1a;}
+.btn-break{background:#f0f0f0;color:#444;}
+.btn-resume{background:#f0f0f0;color:#444;}
+.btn-end{background:#1a1a1a;color:#fff;}
+.success-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:2rem;}
+.s-icon{font-size:64px;}
+.s-title{font-size:22px;font-weight:600;color:#1a1a1a;}
+.s-sub{font-size:15px;color:#888;}
+.s-bar{width:100%;height:5px;background:#f0f0f0;border-radius:3px;margin-top:20px;overflow:hidden;}
+.s-fill{height:100%;background:#F5C800;animation:fill 3s linear forwards;}
+@keyframes fill{from{width:0%}to{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-circle">🌾</div>
+      <div>
+        <div class="logo-text">Bio-Vollwert-Bäckerei Wehr</div>
+        <div class="logo-sub">Zeiterfassung</div>
+      </div>
+    </div>
+    <div class="clock" id="clk"></div>
+  </div>
+
+  <div class="screen" id="s-main">
+    <div>
+      <div class="field-label">Wer bist du?</div>
+      <select id="sel">
+        <option value="">– Name auswählen –</option>
+      </select>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn-yellow" onclick="goPin()">Weiter →</button>
+  </div>
+
+  <div class="screen" id="s-pin" style="display:none">
+    <div class="pin-area">
+      <div class="pin-who">Hallo, <span id="pin-name"></span> 👋</div>
+      <div class="pin-dots">
+        <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+        <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+      </div>
+      <div class="pin-err" id="pin-err"></div>
+    </div>
+    <div class="numpad" id="numpad"></div>
+    <button class="btn-ghost" onclick="goBack()">← Zurück</button>
+  </div>
+
+  <div class="screen" id="s-action" style="display:none">
+    <div class="status-box">
+      <div class="status-emoji" id="s-emoji">👋</div>
+      <div class="status-msg" id="s-msg">Schön, dass du da bist!</div>
+      <div class="status-time" id="s-time"></div>
+    </div>
+    <div class="action-grid">
+      <button class="action-btn btn-start" id="b-start" onclick="doAction('Start')"><span class="icon">▶</span>Start</button>
+      <button class="action-btn btn-break" id="b-break" onclick="doAction('Break')"><span class="icon">⏸</span>Pause</button>
+      <button class="action-btn btn-resume" id="b-resume" onclick="doAction('Resume')"><span class="icon">↩</span>Weiter</button>
+      <button class="action-btn btn-end" id="b-end" onclick="doAction('End')"><span class="icon">⏹</span>Ende</button>
+    </div>
+    <button class="btn-ghost" onclick="goBack()">← Zurück</button>
+  </div>
+
+  <div class="screen" id="s-success" style="display:none">
+    <div class="success-wrap">
+      <div class="s-icon" id="s-icon">✅</div>
+      <div class="s-title" id="s-title"></div>
+      <div class="s-sub" id="s-sub"></div>
+      <div class="s-bar"><div class="s-fill" id="s-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbzJyyMoQ3BnCR8IsrQ2x7-u11Y-6UUSqH-q4aShQUBEXCc-jbqHxmVNX7H25WBjfPJu/exec";
+const NAMES=["Volker M.","Manuel","Isabelle","Tim","Stefan","Thomas","Renate","Jürgen","Ann-Marie","Ela","Marianne","Daniel"];
+let who="",pin="",sd=null;
+
+function tick(){const n=new Date();document.getElementById("clk").innerHTML=n.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"short"})+"<br>"+n.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});}
+setInterval(tick,1000);tick();
+
+const sl=document.getElementById("sel");
+NAMES.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});
+
+function show(id){["s-main","s-pin","s-action","s-success"].forEach(s=>{document.getElementById(s).style.display=s===id?"flex":"none";});}
+
+function goPin(){who=sl.value;if(!who)return;pin="";document.getElementById("pin-name").textContent=who;document.getElementById("pin-err").textContent="";dots();buildPad();show("s-pin");}
+
+function buildPad(){
+  const np=document.getElementById("numpad");np.innerHTML="";
+  [1,2,3,4,5,6,7,8,9].forEach(k=>{nb(np,k,()=>key(k));});
+  nb(np,"⌫",()=>key("del"),"del");
+  nb(np,0,()=>key(0));
+  nb(np,"OK",()=>key("ok"),"ok");
+}
+function nb(p,l,cb,c=""){const b=document.createElement("button");b.className="nkey "+c;b.textContent=l;b.onclick=cb;p.appendChild(b);}
+
+function key(k){
+  if(k==="del"){pin=pin.slice(0,-1);}
+  else if(k==="ok"){submit();return;}
+  else if(pin.length<4){pin+=String(k);}
+  dots();
+  if(pin.length===4)setTimeout(submit,150);
+}
+function dots(){for(let i=0;i<4;i++)document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");}
+
+async function submit(){
+  if(pin.length!==4)return;
+  try{
+    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin})});
+    const d=await r.json();
+    if(d.valid){await loadStatus();}
+    else{document.getElementById("pin-err").textContent="Falscher PIN. Nochmal versuchen.";pin="";dots();}
+  }catch(e){await loadStatus();}
+}
+
+async function loadStatus(){
+  try{
+    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})});
+    sd=await r.json();
+  }catch(e){sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};}
+  showActions();
+}
+
+function showActions(){
+  const emap={neu:"👋",arbeitet:"💪",pause:"☕",beendet:"✅"};
+  document.getElementById("s-emoji").textContent=emap[sd.status]||"👋";
+  document.getElementById("s-msg").textContent=sd.message;
+  document.getElementById("s-time").textContent="";
+  const active=sd.buttons||["Start"];
+  ["start","break","resume","end"].forEach(b=>{
+    const k=b.charAt(0).toUpperCase()+b.slice(1);
+    document.getElementById("b-"+b).disabled=!active.includes(k==="Resume"?"Resume":k==="Start"?"Start":k==="Break"?"Break":"End");
+  });
+  show("s-action");
+}
+
+async function doAction(aktion){
+  const labels={Start:"Schicht gestartet!",Break:"Pause läuft.",Resume:"Weiter geht's!",End:"Tschüss, bis morgen!"};
+  const icons={Start:"▶️",Break:"☕",Resume:"💪",End:"🌾"};
+  try{await fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:who,aktion})});}catch(e){}
+  document.getElementById("s-icon").textContent=icons[aktion];
+  document.getElementById("s-title").textContent=labels[aktion];
+  document.getElementById("s-sub").textContent=who+" · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr";
+  const f=document.getElementById("s-fill");f.style.animation="none";f.offsetHeight;f.style.animation="fill 3s linear forwards";
+  show("s-success");index.html hier einfügen? Do aktuell name you file... steht
