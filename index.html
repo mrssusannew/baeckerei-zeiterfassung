@@ -19,11 +19,19 @@ html,body{width:100%;height:100%;background:#f5f5f0;font-family:-apple-system,Bl
 .logo-sub{font-size:10px;color:#888;}
 .clock{font-size:11px;color:#888;text-align:right;line-height:1.5;}
 .screen{flex:1;display:flex;flex-direction:column;padding:12px;gap:8px;overflow:hidden;}
-.field-label{font-size:13px;color:#888;margin-bottom:5px;font-weight:500;}
-select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;background:#fff;color:#1a1a1a;font-size:16px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
-.spacer{flex:1;}
-.btn-yellow{background:#F5C800;color:#1a1a1a;border:none;border-radius:10px;font-size:18px;font-weight:700;height:56px;width:100%;cursor:pointer;touch-action:manipulation;flex-shrink:0;}
-.btn-ghost{background:#fff;color:#888;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;height:46px;width:100%;cursor:pointer;touch-action:manipulation;flex-shrink:0;}
+
+/* NAME GRID */
+.name-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;}
+.name-btn{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;touch-action:manipulation;width:100%;height:100%;}
+.name-btn:active{background:#F5C800;border-color:#F5C800;}
+.name-btn.active-work{border-color:#F5C800;background:#fffbea;}
+.name-btn.active-break{border-color:#f0a500;background:#fff8e1;}
+.name-label{font-size:14px;font-weight:700;color:#1a1a1a;text-align:center;line-height:1.2;}
+.name-status{font-size:11px;color:#888;margin-top:4px;text-align:center;min-height:14px;}
+.name-status.working{color:#2d7a2d;font-weight:600;}
+.name-status.break{color:#f0a500;font-weight:600;}
+
+/* PIN SCREEN */
 .pin-area{text-align:center;flex-shrink:0;padding:4px 0;}
 .pin-who{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:8px;}
 .pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:4px;}
@@ -35,6 +43,9 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 .nkey:active{background:#F5C800;border-color:#F5C800;}
 .nkey.del{font-size:14px;color:#888;}
 .nkey.ok{background:#F5C800;border-color:#F5C800;font-size:14px;font-weight:700;}
+.btn-ghost{background:#fff;color:#888;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;height:46px;width:100%;cursor:pointer;touch-action:manipulation;flex-shrink:0;}
+
+/* ACTION SCREEN */
 .status-box{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:12px;padding:10px;text-align:center;flex-shrink:0;}
 .status-emoji{font-size:26px;margin-bottom:3px;}
 .status-msg{font-size:15px;font-weight:600;color:#1a1a1a;}
@@ -47,6 +58,8 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 .btn-break{background:#f0f0f0;color:#444;}
 .btn-resume{background:#f0f0f0;color:#444;}
 .btn-end{background:#1a1a1a;color:#fff;}
+
+/* SUCCESS */
 .success-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;}
 .s-icon{font-size:56px;}
 .s-title{font-size:20px;font-weight:700;color:#1a1a1a;}
@@ -72,12 +85,7 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
   </div>
 
   <div class="screen" id="s-main">
-    <div>
-      <div class="field-label">Wer bist du?</div>
-      <select id="sel"><option value="">– Name wird geladen... –</option></select>
-    </div>
-    <div class="spacer"></div>
-    <button class="btn-yellow" onclick="goPin()">Weiter →</button>
+    <div class="name-grid" id="name-grid"></div>
   </div>
 
   <div class="screen" id="s-pin" style="display:none">
@@ -122,6 +130,8 @@ select{width:100%;padding:13px;border:1.5px solid #e0e0e0;border-radius:10px;bac
 const API="https://script.google.com/macros/s/AKfycbzJyyMoQ3BnCR8IsrQ2x7-u11Y-6UUSqH-q4aShQUBEXCc-jbqHxmVNX7H25WBjfPJu/exec";
 const FALLBACK=["Volker M.","Manuel","Isabelle","Tim","Stefan","Thomas","Renate","Jürgen","Ann-Marie","Ela","Marianne","Daniel"];
 let who="", pin="", sd=null, isOnline=navigator.onLine;
+let allStatuses={};
+let employees=[];
 
 function getQueue(){try{return JSON.parse(localStorage.getItem("q")||"[]");}catch(e){return[];}}
 function saveQueue(q){try{localStorage.setItem("q",JSON.stringify(q));}catch(e){}}
@@ -143,13 +153,8 @@ async function syncQueue(){
 
 function updateOnlineStatus(){
   isOnline=navigator.onLine;
-  if(isOnline){
-    document.getElementById("offline-bar").classList.remove("visible");
-    syncQueue();
-  } else {
-    document.getElementById("offline-bar").classList.add("visible");
-    document.getElementById("sync-bar").classList.remove("visible");
-  }
+  if(isOnline){document.getElementById("offline-bar").classList.remove("visible");syncQueue();}
+  else{document.getElementById("offline-bar").classList.add("visible");document.getElementById("sync-bar").classList.remove("visible");}
 }
 window.addEventListener("online",updateOnlineStatus);
 window.addEventListener("offline",updateOnlineStatus);
@@ -161,63 +166,89 @@ function tick(){
 }
 setInterval(tick,1000);tick();
 
-function fillNames(names){
-  const sl=document.getElementById("sel");
-  sl.innerHTML="";
-  const def=document.createElement("option");
-  def.value="";def.textContent="– Name auswählen –";
-  sl.appendChild(def);
-  names.forEach(function(n){const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});
-}
-
-function loadNames(){
-  const cached=localStorage.getItem("emp");
-  if(cached){try{fillNames(JSON.parse(cached));}catch(e){}}
-  window._cb=function(data){
-    if(data.employees&&data.employees.length>0){
-      fillNames(data.employees);
-      localStorage.setItem("emp",JSON.stringify(data.employees));
-    } else if(!cached){fillNames(FALLBACK);}
-  };
-  const s=document.createElement("script");
-  s.onerror=function(){if(!cached)fillNames(FALLBACK);};
-  s.src=API+"?action=getEmployees&callback=_cb";
-  document.head.appendChild(s);
-}
-loadNames();
-
 function show(id){
   ["s-main","s-pin","s-action","s-success"].forEach(function(s){
     document.getElementById(s).style.display=s===id?"flex":"none";
   });
 }
 
-function goPin(){
-  who=document.getElementById("sel").value;
-  if(!who)return;
-  pin="";
-  document.getElementById("pin-name").textContent=who;
+// Load all statuses for startscreen
+function loadAllStatuses(){
+  if(!employees.length)return;
+  fetch(API,{method:"POST",body:JSON.stringify({action:"getAllStatuses",names:employees})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.statuses){allStatuses=data.statuses;renderNameGrid();}
+  })
+  .catch(function(){renderNameGrid();});
+}
+
+function renderNameGrid(){
+  const grid=document.getElementById("name-grid");
+  grid.innerHTML="";
+  employees.forEach(function(name){
+    const st=allStatuses[name]||{status:"none",pauseMin:0};
+    const btn=document.createElement("button");
+    btn.className="name-btn";
+    if(st.status==="arbeitet")btn.classList.add("active-work");
+    if(st.status==="pause")btn.classList.add("active-break");
+
+    let statusHtml="";
+    if(st.status==="arbeitet")statusHtml='<div class="name-status working">🌾 In der Backstube</div>';
+    else if(st.status==="pause")statusHtml='<div class="name-status break">☕ Pause: '+st.pauseMin+' Min</div>';
+    else if(st.status==="beendet"){
+      if(st.pauseMin>0)statusHtml='<div class="name-status">☕ '+st.pauseMin+' Min Pause heute</div>';
+      else statusHtml='<div class="name-status"></div>';
+    }
+    else statusHtml='<div class="name-status"></div>';
+
+    btn.innerHTML='<div class="name-label">'+name+'</div>'+statusHtml;
+    btn.onclick=function(){selectName(name);};
+    grid.appendChild(btn);
+  });
+}
+
+function selectName(name){
+  who=name;pin="";
+  document.getElementById("pin-name").textContent=name;
   document.getElementById("pin-err").textContent="";
   dots();buildPad();show("s-pin");
 }
 
+function loadNames(){
+  const cached=localStorage.getItem("emp");
+  if(cached){try{employees=JSON.parse(cached);renderNameGrid();loadAllStatuses();}catch(e){}}
+  window._cb=function(data){
+    if(data.employees&&data.employees.length>0){
+      employees=data.employees;
+      localStorage.setItem("emp",JSON.stringify(employees));
+      renderNameGrid();
+      loadAllStatuses();
+    } else if(!cached){employees=FALLBACK;renderNameGrid();}
+  };
+  const s=document.createElement("script");
+  s.onerror=function(){if(!cached){employees=FALLBACK;renderNameGrid();}};
+  s.src=API+"?action=getEmployees&callback=_cb";
+  document.head.appendChild(s);
+}
+loadNames();
+
+// Refresh statuses every 60 seconds
+setInterval(loadAllStatuses,60000);
+
 function buildPad(){
-  const np=document.getElementById("numpad");
-  np.innerHTML="";
+  const np=document.getElementById("numpad");np.innerHTML="";
   [1,2,3,4,5,6,7,8,9].forEach(function(k){nb(np,k,function(){key(k);});});
   nb(np,"⌫",function(){key("del");},"del");
   nb(np,0,function(){key(0);});
   nb(np,"OK",function(){key("ok");},"ok");
 }
-
 function nb(p,l,cb,c){
   const b=document.createElement("button");
-  b.className="nkey "+(c||"");
-  b.textContent=l;
+  b.className="nkey "+(c||"");b.textContent=l;
   b.onclick=function(e){e.preventDefault();cb();};
   p.appendChild(b);
 }
-
 function key(k){
   if(k==="del"){pin=pin.slice(0,-1);}
   else if(k==="ok"){submit();return;}
@@ -225,12 +256,7 @@ function key(k){
   dots();
   if(pin.length===4)setTimeout(submit,50);
 }
-
-function dots(){
-  for(var i=0;i<4;i++){
-    document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");
-  }
-}
+function dots(){for(var i=0;i<4;i++){document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");}}
 
 function submit(){
   if(pin.length!==4)return;
@@ -259,9 +285,10 @@ function loadStatus(){
 }
 
 function showActions(){
-  const emap={neu:"👋",arbeitet:"💪",pause:"☕",beendet:"✅"};
+  const emap={neu:"👋",arbeitet:"🌾",pause:"☕",beendet:"✅"};
   document.getElementById("s-emoji").textContent=emap[sd.status]||"👋";
-  document.getElementById("s-msg").textContent=sd.message;
+  const msg=sd.message==="Arbeitet seit"?sd.message.replace("Arbeitet","In der Backstube"):sd.message;
+  document.getElementById("s-msg").textContent=msg;
   document.getElementById("s-time").textContent="";
   const active=sd.buttons||["Start"];
   document.getElementById("b-start").disabled=!active.includes("Start");
@@ -273,34 +300,24 @@ function showActions(){
 
 function doAction(aktion){
   const labels={Start:"Schicht gestartet!",Break:"Pause läuft.",Resume:"Weiter geht's!",End:"Tschüss, bis morgen!"};
-  const icons={Start:"▶️",Break:"☕",Resume:"💪",End:"🌾"};
-
+  const icons={Start:"🌾",Break:"☕",Resume:"💪",End:"✅"};
   document.getElementById("s-icon").textContent=icons[aktion];
   document.getElementById("s-title").textContent=labels[aktion];
   document.getElementById("s-sub").textContent=who+" · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr";
-  var f=document.getElementById("s-fill");
-  f.style.animation="none";
-  f.offsetHeight;
-  f.style.animation="fill 3s linear forwards";
+  var f=document.getElementById("s-fill");f.style.animation="none";f.offsetHeight;f.style.animation="fill 3s linear forwards";
   show("s-success");
-
   addToQueue(who,aktion);
   if(isOnline){
     fetch(API,{method:"POST",body:JSON.stringify({action:"logEvent",name:who,aktion:aktion})})
     .then(function(){
       var q=getQueue();
-      var idx=-1;
-      for(var i=q.length-1;i>=0;i--){if(q[i].name===who&&q[i].aktion===aktion){idx=i;break;}}
-      if(idx>-1){q.splice(idx,1);saveQueue(q);}
-    })
-    .catch(function(){});
+      for(var i=q.length-1;i>=0;i--){if(q[i].name===who&&q[i].aktion===aktion){q.splice(i,1);break;}}
+      saveQueue(q);
+    }).catch(function(){});
   }
-
   setTimeout(function(){
-    who="";
-    pin="";
-    var sl=document.getElementById("sel");
-    if(sl)sl.value="";
+    who="";pin="";
+    loadAllStatuses();
     show("s-main");
   },3000);
 }
