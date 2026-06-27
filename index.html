@@ -6,53 +6,51 @@
 <title>Bäckerei Wehr – Zeiterfassung</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;}
-.app{width:100%;max-width:480px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.08);}
-.header{background:#fff;border-bottom:3px solid #F5C800;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
-.logo-area{display:flex;align-items:center;gap:12px;}
-.logo-circle{width:48px;height:48px;border-radius:50%;border:3px solid #F5C800;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-.logo-text{font-size:16px;font-weight:600;color:#1a1a1a;}
-.logo-sub{font-size:12px;color:#888;margin-top:1px;}
-.clock{font-size:13px;color:#888;text-align:right;line-height:1.5;}
-.screen{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;min-height:420px;}
-.field-label{font-size:13px;color:#888;margin-bottom:6px;font-weight:500;}
-select{width:100%;padding:16px;border:1.5px solid #e0e0e0;border-radius:12px;background:#fff;color:#1a1a1a;font-size:18px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.app{width:100%;max-width:520px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.08);}
+.header{background:#fff;border-bottom:3px solid #F5C800;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;}
+.logo-area{display:flex;align-items:center;gap:10px;}
+.logo-circle{width:42px;height:42px;border-radius:50%;border:3px solid #F5C800;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.logo-text{font-size:15px;font-weight:600;color:#1a1a1a;}
+.logo-sub{font-size:11px;color:#888;margin-top:1px;}
+.clock{font-size:12px;color:#888;text-align:right;line-height:1.5;}
+.screen{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:0.75rem;}
+.field-label{font-size:13px;color:#888;margin-bottom:5px;font-weight:500;}
+select{width:100%;padding:14px;border:1.5px solid #e0e0e0;border-radius:12px;background:#fff;color:#1a1a1a;font-size:17px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
 select:focus{outline:none;border-color:#F5C800;}
-.spacer{flex:1;}
-.btn-yellow{background:#F5C800;color:#1a1a1a;border:none;border-radius:12px;font-size:20px;font-weight:600;padding:20px;width:100%;cursor:pointer;}
+.btn-yellow{background:#F5C800;color:#1a1a1a;border:none;border-radius:12px;font-size:19px;font-weight:600;padding:18px;width:100%;cursor:pointer;}
 .btn-yellow:active{background:#e6b800;}
-.btn-ghost{background:#fff;color:#888;border:1.5px solid #e0e0e0;border-radius:12px;font-size:16px;padding:15px;width:100%;cursor:pointer;margin-top:4px;}
-.pin-area{text-align:center;padding:0.5rem 0;}
-.pin-who{font-size:18px;font-weight:600;color:#1a1a1a;margin-bottom:16px;}
-.pin-dots{display:flex;gap:16px;justify-content:center;margin-bottom:8px;}
-.dot{width:18px;height:18px;border-radius:50%;background:#e0e0e0;}
+.btn-ghost{background:#fff;color:#888;border:1.5px solid #e0e0e0;border-radius:12px;font-size:15px;padding:13px;width:100%;cursor:pointer;}
+.pin-area{text-align:center;padding:0.25rem 0;}
+.pin-who{font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:12px;}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:6px;}
+.dot{width:16px;height:16px;border-radius:50%;background:#e0e0e0;}
 .dot.filled{background:#F5C800;}
-.pin-err{color:#c0392b;font-size:14px;margin-top:8px;min-height:20px;}
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.nkey{padding:20px;background:#fafafa;border:1.5px solid #f0f0f0;border-radius:12px;font-size:22px;font-weight:500;cursor:pointer;color:#1a1a1a;}
+.pin-err{color:#c0392b;font-size:13px;margin-top:6px;min-height:18px;}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.nkey{padding:0;height:64px;background:#fafafa;border:1.5px solid #f0f0f0;border-radius:12px;font-size:22px;font-weight:500;cursor:pointer;color:#1a1a1a;display:flex;align-items:center;justify-content:center;}
 .nkey:active{background:#F5C800;border-color:#F5C800;}
 .nkey.del{font-size:16px;color:#888;}
 .nkey.ok{background:#F5C800;border-color:#F5C800;font-size:16px;font-weight:600;}
-.status-box{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:1.5rem;text-align:center;}
-.status-emoji{font-size:36px;margin-bottom:8px;}
-.status-msg{font-size:17px;font-weight:600;color:#1a1a1a;}
-.status-time{font-size:14px;color:#888;margin-top:4px;}
-.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.action-btn{padding:26px 10px;border:none;border-radius:14px;font-size:18px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;}
-.action-btn .icon{font-size:28px;}
+.status-box{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:1rem;text-align:center;}
+.status-emoji{font-size:32px;margin-bottom:6px;}
+.status-msg{font-size:16px;font-weight:600;color:#1a1a1a;}
+.status-time{font-size:13px;color:#888;margin-top:3px;}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.action-btn{padding:0;height:90px;border:none;border-radius:14px;font-size:17px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.action-btn .icon{font-size:26px;}
 .action-btn:disabled{opacity:0.2;cursor:not-allowed;}
 .btn-start{background:#F5C800;color:#1a1a1a;}
 .btn-break{background:#f0f0f0;color:#444;}
 .btn-resume{background:#f0f0f0;color:#444;}
 .btn-end{background:#1a1a1a;color:#fff;}
-.success-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:2rem;}
-.s-icon{font-size:64px;}
-.s-title{font-size:22px;font-weight:600;color:#1a1a1a;}
-.s-sub{font-size:15px;color:#888;}
-.s-bar{width:100%;height:5px;background:#f0f0f0;border-radius:3px;margin-top:20px;overflow:hidden;}
+.success-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:2rem 1rem;}
+.s-icon{font-size:56px;}
+.s-title{font-size:20px;font-weight:600;color:#1a1a1a;}
+.s-sub{font-size:14px;color:#888;}
+.s-bar{width:100%;height:5px;background:#f0f0f0;border-radius:3px;margin-top:16px;overflow:hidden;}
 .s-fill{height:100%;background:#F5C800;animation:fill 3s linear forwards;}
 @keyframes fill{from{width:0%}to{width:100%}}
-.loading{text-align:center;color:#888;font-size:15px;padding:1rem;}
 </style>
 </head>
 <body>
@@ -74,9 +72,7 @@ select:focus{outline:none;border-color:#F5C800;}
       <select id="sel">
         <option value="">– Name wird geladen... –</option>
       </select>
-      <div class="loading" id="loading-hint"></div>
     </div>
-    <div class="spacer"></div>
     <button class="btn-yellow" onclick="goPin()">Weiter →</button>
   </div>
 
@@ -126,73 +122,37 @@ let who="",pin="",sd=null;
 function tick(){const n=new Date();document.getElementById("clk").innerHTML=n.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"short"})+"<br>"+n.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});}
 setInterval(tick,1000);tick();
 
-function fillNames(names){
-  const sl=document.getElementById("sel");
-  sl.innerHTML="";
-  const def=document.createElement("option");
-  def.value="";def.textContent="– Name auswählen –";
-  sl.appendChild(def);
-  names.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});
-}
+function fillNames(names){const sl=document.getElementById("sel");sl.innerHTML="";const def=document.createElement("option");def.value="";def.textContent="– Name auswählen –";sl.appendChild(def);names.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sl.appendChild(o);});}
 
 async function loadNames(){
-  try{
-    const script=document.createElement("script");
-    window._cb=function(data){
-      if(data.employees && data.employees.length>0){
-        fillNames(data.employees);
-      } else {
-        fillNames(FALLBACK);
-      }
-    };
-    script.src=API+"?action=getEmployees&callback=_cb";
-    document.head.appendChild(script);
-  }catch(e){
-    fillNames(FALLBACK);
-  }
+  try{window._cb=function(data){if(data.employees&&data.employees.length>0){fillNames(data.employees);}else{fillNames(FALLBACK);}};
+  const s=document.createElement("script");s.src=API+"?action=getEmployees&callback=_cb";document.head.appendChild(s);
+  }catch(e){fillNames(FALLBACK);}
 }
 loadNames();
 
 function show(id){["s-main","s-pin","s-action","s-success"].forEach(s=>{document.getElementById(s).style.display=s===id?"flex":"none";});}
-
 function goPin(){who=document.getElementById("sel").value;if(!who)return;pin="";document.getElementById("pin-name").textContent=who;document.getElementById("pin-err").textContent="";dots();buildPad();show("s-pin");}
 
 function buildPad(){
   const np=document.getElementById("numpad");np.innerHTML="";
   [1,2,3,4,5,6,7,8,9].forEach(k=>{nb(np,k,()=>key(k));});
-  nb(np,"⌫",()=>key("del"),"del");
-  nb(np,0,()=>key(0));
-  nb(np,"OK",()=>key("ok"),"ok");
+  nb(np,"⌫",()=>key("del"),"del");nb(np,0,()=>key(0));nb(np,"OK",()=>key("ok"),"ok");
 }
 function nb(p,l,cb,c=""){const b=document.createElement("button");b.className="nkey "+c;b.textContent=l;b.onclick=cb;p.appendChild(b);}
-
-function key(k){
-  if(k==="del"){pin=pin.slice(0,-1);}
-  else if(k==="ok"){submit();return;}
-  else if(pin.length<4){pin+=String(k);}
-  dots();
-  if(pin.length===4)setTimeout(submit,150);
-}
+function key(k){if(k==="del"){pin=pin.slice(0,-1);}else if(k==="ok"){submit();return;}else if(pin.length<4){pin+=String(k);}dots();if(pin.length===4)setTimeout(submit,150);}
 function dots(){for(let i=0;i<4;i++)document.getElementById("d"+i).className="dot"+(i<pin.length?" filled":"");}
 
 async function submit(){
   if(pin.length!==4)return;
-  try{
-    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin})});
-    const d=await r.json();
-    if(d.valid){await loadStatus();}
-    else{document.getElementById("pin-err").textContent="Falscher PIN. Nochmal versuchen.";pin="";dots();}
-  }catch(e){await loadStatus();}
+  try{const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"checkPin",name:who,pin})});const d=await r.json();if(d.valid){await loadStatus();}else{document.getElementById("pin-err").textContent="Falscher PIN. Nochmal versuchen.";pin="";dots();}}
+  catch(e){await loadStatus();}
 }
-
 async function loadStatus(){
-  try{
-    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})});
-    sd=await r.json();
-  }catch(e){sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};}
+  try{const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"getStatus",name:who})});sd=await r.json();}
+  catch(e){sd={status:"neu",message:"Schön, dass du da bist!",buttons:["Start"]};}
   showActions();
 }
-
 function showActions(){
   const emap={neu:"👋",arbeitet:"💪",pause:"☕",beendet:"✅"};
   document.getElementById("s-emoji").textContent=emap[sd.status]||"👋";
@@ -205,7 +165,6 @@ function showActions(){
   document.getElementById("b-end").disabled=!active.includes("End");
   show("s-action");
 }
-
 async function doAction(aktion){
   const labels={Start:"Schicht gestartet!",Break:"Pause läuft.",Resume:"Weiter geht's!",End:"Tschüss, bis morgen!"};
   const icons={Start:"▶️",Break:"☕",Resume:"💪",End:"🌾"};
@@ -214,10 +173,8 @@ async function doAction(aktion){
   document.getElementById("s-title").textContent=labels[aktion];
   document.getElementById("s-sub").textContent=who+" · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr";
   const f=document.getElementById("s-fill");f.style.animation="none";f.offsetHeight;f.style.animation="fill 3s linear forwards";
-  show("s-success");
-  setTimeout(reset,3000);
+  show("s-success");setTimeout(reset,3000);
 }
-
 function reset(){who="";pin="";document.getElementById("sel").value="";show("s-main");}
 function goBack(){if(document.getElementById("s-action").style.display!=="none")show("s-pin");else reset();}
 </script>
